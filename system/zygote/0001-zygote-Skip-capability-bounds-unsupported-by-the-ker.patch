@@ -1,0 +1,46 @@
+From f72a6c7335f9c70aabda37cdedf8c5e5f845b72e Mon Sep 17 00:00:00 2001
+From: seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+Date: Wed, 4 Nov 2026 10:45:49 +0000
+Subject: [PATCH] zygote: Skip capability bounds unsupported by the kernel
+
+Android userspace defines capability 40, but the chopin 4.14 kernel
+implements capabilities only through 39. PR_CAPBSET_READ returns EINVAL
+for the unknown bit, causing every native app zygote to panic before
+initializing its socket. Chrome then times out waiting for its GPU
+process and blocks other app starts on the system_server start thread.
+
+Ignore only GetCapBoundFailure(EINVAL), as there is no kernel capability
+to drop. Keep actual capability drops and all other failures unchanged.
+
+Verified by strace of the failing child, existing host unit tests; see LOS24-PORT-LOG for the device evidence.
+
+Change-Id: I16a7a2c5eb9ea1ca83c2c99bd15deeef8f717662
+---
+ zygote/src/child_process.rs | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/zygote/src/child_process.rs b/zygote/src/child_process.rs
+index f6ec741..605666b 100644
+--- a/zygote/src/child_process.rs
++++ b/zygote/src/child_process.rs
+@@ -83,8 +83,15 @@ pub(crate) fn re_initialize(
+     if let Some(cap_bound) = spawn_params.cap_bound {
+         for flag in cap_bound.complement().iter() {
+             let cap = Capability::try_from(flag.bits().trailing_zeros()).unwrap();
+-            if cap::cap_within_bound(cap).expect("Failed to check capability bound") {
+-                cap::cap_drop_bound(cap).expect("Failed to drop capability bound");
++            match cap::cap_within_bound(cap) {
++                Ok(true) => cap::cap_drop_bound(cap).expect("Failed to drop capability bound"),
++                Ok(false) => {}
++                // Userspace headers may define capabilities that this kernel does not
++                // implement. PR_CAPBSET_READ returns EINVAL for these nonexistent bits;
++                // there is no capability to drop. Keep all other failures fatal.
++                Err(cap::CapabilityError::GetCapBoundFailure(errno))
++                    if errno as i32 == libc::EINVAL => {}
++                Err(error) => panic!("Failed to check capability bound: {error}"),
+             }
+         }
+     }
+-- 
+2.53.0
+
