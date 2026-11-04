@@ -1,0 +1,197 @@
+From 1863e9803b6d91560a0d4f7e6fc20d3e4cbf5cd4 Mon Sep 17 00:00:00 2001
+From: seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+Date: Wed, 4 Nov 2026 13:41:48 +0000
+Subject: [PATCH] Support process reclaim and gate freezing on legacy kernels
+
+Change-Id: I6a18042714784a936751d88ed307bbe92c433e79
+---
+ .../android/server/am/CachedAppOptimizer.java | 36 +++++++-----
+ .../com/android/server/am/ProcessList.java    |  5 +-
+ ...m_android_server_am_CachedAppOptimizer.cpp | 58 ++++++++++++++++---
+ 3 files changed, 77 insertions(+), 22 deletions(-)
+
+diff --git a/services/core/java/com/android/server/am/CachedAppOptimizer.java b/services/core/java/com/android/server/am/CachedAppOptimizer.java
+index 8f0a95e78..1bf08a34f 100644
+--- a/services/core/java/com/android/server/am/CachedAppOptimizer.java
++++ b/services/core/java/com/android/server/am/CachedAppOptimizer.java
+@@ -912,9 +912,10 @@ public class CachedAppOptimizer {
+      * @param compactionFlags selects the compaction type as defined by COMPACT_ACTION_{TYPE}_FLAG
+      *         constants
+      */
+-    private static native void compactProcess(int pid, int compactionFlags);
++    private static native void compactProcess(int pid, int compactionFlags) throws IOException;
+     private static native void performNativeMemcgCompaction(int uid, int pid, int compactionFlags);
+-    private static native void compactNativeProcess(int pid, int compactionFlags);
++    private static native void compactNativeProcess(int pid, int compactionFlags)
++            throws IOException;
+     private static native boolean compactionFlagsValidForMemcg(int compactionFlags);
+ 
+     static private native void cancelCompaction();
+@@ -2726,14 +2727,17 @@ public class CachedAppOptimizer {
+         @Override
+         public void performCompaction(CompactProfile profile, int pid) throws IOException {
+             mPidCompacting = pid;
+-            if (profile == CompactProfile.FULL) {
+-                compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
+-            } else if (profile == CompactProfile.SOME) {
+-                compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
+-            } else if (profile == CompactProfile.ANON) {
+-                compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
++            try {
++                if (profile == CompactProfile.FULL) {
++                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
++                } else if (profile == CompactProfile.SOME) {
++                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
++                } else if (profile == CompactProfile.ANON) {
++                    compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
++                }
++            } finally {
++                mPidCompacting = -1;
+             }
+-            mPidCompacting = -1;
+         }
+ 
+         @Override
+@@ -2741,8 +2745,11 @@ public class CachedAppOptimizer {
+                 throws IOException {
+             int compactionFlags = getCompactionFlags(profile);
+             mPidCompacting = pid;
+-            performNativeMemcgCompaction(uid, pid, compactionFlags);
+-            mPidCompacting = -1;
++            try {
++                performNativeMemcgCompaction(uid, pid, compactionFlags);
++            } finally {
++                mPidCompacting = -1;
++            }
+         }
+ 
+         // Compaction normally requires the UID to identify the correct cgroup path for the process
+@@ -2760,8 +2767,11 @@ public class CachedAppOptimizer {
+                 throws IOException {
+             int compactionFlags = getCompactionFlags(profile);
+             mPidCompacting = pid;
+-            compactNativeProcess(pid, compactionFlags);
+-            mPidCompacting = -1;
++            try {
++                compactNativeProcess(pid, compactionFlags);
++            } finally {
++                mPidCompacting = -1;
++            }
+         }
+     }
+ 
+diff --git a/services/core/java/com/android/server/am/ProcessList.java b/services/core/java/com/android/server/am/ProcessList.java
+index d8e2cfaae..859e62554 100644
+--- a/services/core/java/com/android/server/am/ProcessList.java
++++ b/services/core/java/com/android/server/am/ProcessList.java
+@@ -3296,8 +3296,9 @@ public final class ProcessList extends ProcessListInternal
+ 
+             // Do not freeze for system apps or for dependencies of the targeted package, but
+             // make sure to freeze the targeted package for all users if called with USER_ALL.
+-            final boolean doFreeze = (killingUserApp && packageAppId == appId)
+-                    || (killingPccApp && packageAppId == pccAppId);
++            final boolean doFreeze = ((killingUserApp && packageAppId == appId)
++                    || (killingPccApp && packageAppId == pccAppId))
++                    && mService.getFreezer().isFreezerSupported();
+ 
+             if (doFreeze) freezeBinderAndPackageCgroup(uidProcs, packageUID);
+ 
+diff --git a/services/core/jni/com_android_server_am_CachedAppOptimizer.cpp b/services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
+index 8b9d34768..a686534c6 100644
+--- a/services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
++++ b/services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
+@@ -27,6 +27,7 @@
+ #include <binder/BinderNetlink.h>
+ #include <cutils/compiler.h>
+ #include <dirent.h>
++#include <fcntl.h>
+ #include <jni.h>
+ #include <linux/android/binderfs.h>
+ #include <linux/errno.h>
+@@ -419,9 +420,46 @@ static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
+     return pageoutBytes + coldBytes;
+ }
+ 
+-// Compact process using process_madvise syscall
+-static void compactProcess(int pid, int compactionFlags) {
+-    if ((compactionFlags & (COMPACT_ACTION_ANON_FLAG | COMPACT_ACTION_FILE_FLAG)) == 0) return;
++// Probe the syscall itself, independently of a target process's lifetime.
++// EBADF/EINVAL mean it exists; only ENOSYS selects the old Android ABI.
++static bool hasProcessMadvise() {
++    static const bool supported = [] {
++        errno = 0;
++        const struct iovec unused = {};
++        const auto result = process_madvise(-1, &unused, 0, MADV_COLD, 0);
++        const bool available = result != -1 || errno != ENOSYS;
++        if (!available) ALOGI("process_madvise unavailable; using /proc/pid/reclaim");
++        return available;
++    }();
++    return supported;
++}
++
++static int compactProcessLegacy(int pid, int compactionFlags) {
++    cancelRunningCompaction.store(false);
++    // Pin the proc directory so a recycled PID cannot redirect openat().
++    unique_fd proc(open(StringPrintf("/proc/%d", pid).c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC));
++    if (proc < 0) return -errno;
++    unique_fd reclaim(openat(proc, "reclaim", O_WRONLY | O_CLOEXEC));
++    if (reclaim < 0) return -errno;
++    if (cancelRunningCompaction.load()) return ERROR_COMPACTION_CANCELLED;
++    const char* command = compactionFlags == COMPACT_ACTION_FILE_FLAG ? "file" :
++            compactionFlags == COMPACT_ACTION_ANON_FLAG ? "anon" : "all";
++    const size_t length = strlen(command);
++    const ssize_t written = TEMP_FAILURE_RETRY(write(reclaim, command, length));
++    if (written < 0) return -errno;
++    if (static_cast<size_t>(written) != length) return -EIO;
++    // The old ABI reports command acceptance, not bytes reclaimed. Java measures
++    // actual RSS/swap before and after; do not invent a reclaimed-byte count.
++    return 0;
++}
++
++// Return errors to JNI so unsuccessful operations are not recorded as success.
++static int64_t compactProcess(int pid, int compactionFlags) {
++    if (pid <= 0 || (compactionFlags & ~(COMPACT_ACTION_ANON_FLAG | COMPACT_ACTION_FILE_FLAG))) {
++        return -EINVAL;
++    }
++    if (compactionFlags == 0) return 0;
++    if (!hasProcessMadvise()) return compactProcessLegacy(pid, compactionFlags);
+ 
+     bool compactAnon = compactionFlags & COMPACT_ACTION_ANON_FLAG;
+     bool compactFile = compactionFlags & COMPACT_ACTION_FILE_FLAG;
+@@ -438,7 +476,7 @@ static void compactProcess(int pid, int compactionFlags) {
+         vmaToAdviseFunc = getFilePageAdvice;
+     }
+ 
+-    compactProcess(pid, vmaToAdviseFunc);
++    return compactProcess(pid, vmaToAdviseFunc);
+ }
+ 
+ static std::string profileFromCompactionFlags(int compactionFlags) {
+@@ -565,15 +603,21 @@ static void com_android_server_am_CachedAppOptimizer_compactProcessWithMemcg(JNI
+     compactMemcg(uid, pid, compactionFlags);
+ }
+ 
+-static void com_android_server_am_CachedAppOptimizer_compactNativeProcess(JNIEnv*, jobject,
++static void com_android_server_am_CachedAppOptimizer_compactNativeProcess(JNIEnv* env, jobject,
+                                                                           jint pid,
+                                                                           jint compactionFlags) {
+-    compactProcess(pid, compactionFlags);
++    const int64_t result = compactProcess(pid, compactionFlags);
++    if (result == ERROR_COMPACTION_CANCELLED) {
++        jniThrowException(env, "java/io/IOException", "Compaction cancelled");
++    } else if (result < 0) {
++        jniThrowIOException(env, static_cast<int>(-result));
++    }
+ }
+ 
+ static jboolean com_android_server_am_CachedAppOptimizer_compactionFlagsValidForMemcg(
+         JNIEnv* env, jobject, jint compactionFlags) {
+-    static std::array<std::optional<bool>, 3> valid;
++    // NONE=0, FILE=1, ANON=2, FULL=3 are all valid combinations.
++    static std::array<std::optional<bool>, 4> valid;
+ 
+     if (compactionFlags >= valid.size() || compactionFlags < 0) {
+         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid compaction flags");
+-- 
+2.53.0
+
