@@ -1,0 +1,110 @@
+From bebb5803ec9b189ebe736cf2db4ef94bb5df1efa Mon Sep 17 00:00:00 2001
+From: seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 16:40:00 +0000
+Subject: [PATCH] git_config: tolerate read-only cache cleanup
+
+---
+ git_config.py                     |  8 +++-
+ tests/test_git_config_readonly.py | 64 +++++++++++++++++++++++++++++++
+ 2 files changed, 70 insertions(+), 2 deletions(-)
+ create mode 100644 tests/test_git_config_readonly.py
+
+diff --git a/git_config.py b/git_config.py
+index f3f1e5b..3c95e48 100644
+--- a/git_config.py
++++ b/git_config.py
+@@ -429,7 +429,9 @@ class GitConfig:
+                 with open(self._json) as fd:
+                     return json.load(fd)
+         except (OSError, ValueError):
+-            platform_utils.remove(self._json, missing_ok=True)
++            # Config caches are optional, including on read-only filesystems.
++            with contextlib.suppress(OSError):
++                platform_utils.remove(self._json, missing_ok=True)
+             return None
+ 
+     def _SaveJson(self, cache):
+@@ -437,7 +439,9 @@ class GitConfig:
+             with open(self._json, "w") as fd:
+                 json.dump(cache, fd, indent=2)
+         except (OSError, TypeError):
+-            platform_utils.remove(self._json, missing_ok=True)
++            # Config caches are optional, including on read-only filesystems.
++            with contextlib.suppress(OSError):
++                platform_utils.remove(self._json, missing_ok=True)
+ 
+     def _ReadGit(self):
+         """
+diff --git a/tests/test_git_config_readonly.py b/tests/test_git_config_readonly.py
+new file mode 100644
+index 0000000..76cdd6e
+--- /dev/null
++++ b/tests/test_git_config_readonly.py
+@@ -0,0 +1,64 @@
++#!/usr/bin/env python3
++"""Regression tests for Repo config reads when optional caches are read-only.
++
++Run with PYTHONPATH=. python3 tests/test_git_config_readonly.py -v from Repo.
++"""
++import errno
++import json
++import os
++from pathlib import Path
++import tempfile
++import unittest
++from unittest import mock
++
++import git_config
++
++
++class ReadOnlyCacheTests(unittest.TestCase):
++    def test_config_reads_survive_readonly_cache(self):
++        for state in ('missing-config', 'missing-cache', 'stale', 'invalid'):
++            with self.subTest(state=state), tempfile.TemporaryDirectory() as tmp:
++                config_path = Path(tmp) / 'config'
++                cache_path = Path(tmp) / 'cache.json'
++                if state != 'missing-config':
++                    config_path.write_text('[section]\nkey = original\n')
++                if state == 'stale':
++                    cache_path.write_text(json.dumps({'section.key': ['stale']}))
++                    os.utime(cache_path, ns=(0, 0))
++                elif state == 'invalid':
++                    cache_path.write_text('{broken')
++                config = git_config.GitConfig(config_path, jsonFile=str(cache_path))
++                expected = None if state == 'missing-config' else 'original'
++                real_open = open
++
++                def readonly_open(path, mode='r', *args, **kwargs):
++                    if str(path) == str(cache_path) and mode == 'w':
++                        raise OSError(errno.EROFS, 'Read-only file system')
++                    return real_open(path, mode, *args, **kwargs)
++
++                # Force invalid JSON through the parse path; stale caches use
++                # the invalidation path and missing files use the stat fallback.
++                stat_patch = (mock.patch.object(git_config.os.path, 'getmtime',
++                                               side_effect=[2, 1])
++                              if state == 'invalid' else mock.patch.object(
++                                  git_config.os.path, 'getmtime',
++                                  wraps=git_config.os.path.getmtime))
++                with stat_patch, mock.patch('builtins.open', readonly_open), \
++                     mock.patch.object(git_config.platform_utils, 'remove',
++                                       side_effect=OSError(errno.EROFS,
++                                                           'Read-only file system')):
++                    self.assertEqual(config.GetString('section.key'), expected)
++
++    def test_writable_cache_still_roundtrips(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            config_path = Path(tmp) / 'config'
++            cache_path = Path(tmp) / 'cache.json'
++            config_path.write_text('[section]\nkey = original\n')
++            config = git_config.GitConfig(config_path, jsonFile=str(cache_path))
++            self.assertEqual(config.GetString('section.key'), 'original')
++            self.assertEqual(json.loads(cache_path.read_text()),
++                             {'section.key': ['original']})
++
++
++if __name__ == '__main__':
++    unittest.main()
+-- 
+2.53.0
+

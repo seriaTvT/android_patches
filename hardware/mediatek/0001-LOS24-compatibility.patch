@@ -1,0 +1,24 @@
+From e50baf04280d968fd0f4666208a2f8362f2eb96f Mon Sep 17 00:00:00 2001
+From: seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 12:21:31 +0000
+Subject: [PATCH] mediatek: Import split Pixel USB and stats namespaces
+
+---
+ Android.bp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Android.bp b/Android.bp
+index e69df8d..27f4680 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -2,5 +2,7 @@ soong_namespace {
+     imports: [
+         "hardware/google/interfaces",
+         "hardware/google/pixel",
++        "hardware/google/pixel/pixelstats",
++        "hardware/google/pixel/usb",
+     ],
+ }
+-- 
+2.53.0
+

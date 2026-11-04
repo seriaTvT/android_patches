@@ -1,0 +1,27 @@
+From f4cf84defbe16342c67d6e8de90b776f1e74c0e0 Mon Sep 17 00:00:00 2001
+From: seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 12:21:31 +0000
+Subject: [PATCH] ui: Allow an opt-in Go memory limit for Soong analysis
+
+Change-Id: Ia893212f8536584712fdf4ec1cf0f8a628a20840
+---
+ ui/build/soong.go | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/ui/build/soong.go b/ui/build/soong.go
+index 4521b4a..ac9dab0 100644
+--- a/ui/build/soong.go
++++ b/ui/build/soong.go
+@@ -215,6 +215,9 @@ func (pb PrimaryBuilderFactory) primaryBuilderInvocation(config Config) bootstra
+ 
+ 	commonArgs = append(commonArgs, "-l", filepath.Join(pb.config.FileListDir(), "Android.bp.list"))
+ 	invocationEnv := make(map[string]string)
++	if limit := os.Getenv("SOONG_GOMEMLIMIT"); limit != "" {
++		invocationEnv["GOMEMLIMIT"] = limit
++	}
+ 	if pb.debugPort != "" {
+ 		//debug mode
+ 		commonArgs = append(commonArgs, "--delve_listen", pb.debugPort,
+-- 
+2.53.0
+

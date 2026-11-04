@@ -1,45 +1,32 @@
-# android_patches — local patches for the chopin/ares MT6893 LOS 24 tree
+# MT6893 LineageOS 24 compatibility patches
 
-Small, self-contained changes to **upstream-managed** AOSP/LineageOS projects
-that don't justify forking the whole repo. Wired into the tree via
-`.repo/local_manifests/mt6893.xml` (cloned to `patches/`).
+Use the pinned `lineage-24.0` branch of [seriaTvT/local_manifests](https://github.com/seriaTvT/local_manifests/tree/lineage-24.0).
 
-## Usage
+After sync, from the Android source root:
 
-After every `repo sync`, before `lunch`/`m`:
-
-```bash
-./patches/apply-patches.sh
+```sh
+bash patches/apply-patches.sh
+bash patches/apply-patches.sh --check
 ```
 
-Idempotent — already-applied patches are skipped; a patch that no longer
-applies stops the script so you can rebase it (a loud failure, by design).
+`series.json` pins the upstream base, original tested commit, expected final Git
+tree, and SHA256 of every patch. The script preflights all projects, refuses wrong
+bases or tracked changes, never resets an existing branch, and verifies the final
+source trees. Repeated application is safe. New commit IDs may differ because of
+committer metadata; final source trees must match exactly.
 
-## Contents
+| Project | Compatibility change |
+|---|---|
+| build/soong | Opt-in SOONG_GOMEMLIMIT for large analysis runs |
+| hardware/interfaces | Frozen HIDL packages required by FCM 6 |
+| hardware/mediatek | Pixel USB/statistics namespace imports |
+| frameworks/base | Legacy process reclaim, real JNI errors, freezer capability gate |
+| frameworks/av | Revert MTK queue-empty-work behavior |
+| system/core | Rate-limit old MediaTek RefBase destruction backtraces |
+| system/zygote | Skip capability bounds absent from the actual kernel |
+| .repo/repo | Read-only Git-config cache cleanup compatibility (Repo v2.71) |
 
-| Project | Patch | Why |
-|---|---|---|
-| `system/core` | rate-limit RefBase explicit-destruction backtrace | MediaTek `libgpu_aux` trips `RefBase`'s per-object CallStack capture on every `eglDestroyImageKHR`, pegging the GPU thread → media-playback stutter. See PORT-LOG 2026-07-23. |
-| `frameworks/av` | Revert "codec2: Extend the queue empty work hack to MTK decoders too" | MTK decoder behavior (was the sole delta of the retired `frameworks/av` fork). Re-evaluate whether upstream still needs it. |
-| `system/zygote` | tolerate unknown capability bounds on older kernels | Native App Zygote must skip PR_CAPBSET_READ EINVAL for capability bits absent from the running kernel; keep real drop failures fatal. Fixes Chrome startup and the ensuing application-start timeouts on 4.14. |
-| `frameworks/base` | legacy-kernel reclaim and freeze gating | Select `/proc/pid/reclaim` only on process_madvise ENOSYS; propagate failures; check freezer capability before force-stop. |
-| `kernel/xiaomi/mt6893` | ARM64 private expedited sync-core membarrier | Add instruction synchronization for ART JIT with independent registration and real cross-CPU IPIs/ERET semantics. |
-
-## Adding a patch
-
-```bash
-cd <project> && git format-patch -1 -o <tree>/patches/<project>/
-```
-Commit it here, push, done — a fresh `repo sync` + `apply-patches.sh` reproduces it.
-
-## One-time: retiring the frameworks/av fork
-
-The old fork is replaced by the `frameworks/av` patch above. To switch the live
-tree over to upstream + patch:
-
-```bash
-# from tree root, with the frameworks/av override already removed from mt6893.xml
-rm -rf frameworks/av .repo/projects/frameworks/av.git .repo/project-objects/android_frameworks_av.git
-repo sync -c --force-sync frameworks/av      # re-clones pristine LineageOS
-./patches/apply-patches.sh                   # re-applies the revert on a topic branch
-```
+The ARM64 sync-core change is published directly on `seriaTvT/kernel_mt6893`
+`lineage-24.0`; it is not applied twice here. Device/vendor integration belongs
+in the existing seriaTvT device/vendor repositories. No new platform forks are
+required by this series. No private signing key is included.

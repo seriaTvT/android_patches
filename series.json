@@ -1,0 +1,98 @@
+[
+  {
+    "project": "build/soong",
+    "base": "a528a88bd553d2a449ad9338a3e944b89a164971",
+    "tree": "89b994a30dbbb6d8b5f3d757770d163c6bfce96f",
+    "commit": "f4cf84defbe16342c67d6e8de90b776f1e74c0e0",
+    "patches": [
+      {
+        "file": "build/soong/0001-LOS24-compatibility.patch",
+        "sha256": "ffe5e687c5acf51fe2043137af64d54d44d736b054b60d1bc6046c73c6b9190c"
+      }
+    ]
+  },
+  {
+    "project": "hardware/interfaces",
+    "base": "13fc23dae0dcd24fc2411d74f54a407999eaf555",
+    "tree": "19d6a95a6cfcac7dfc52777a413919bafc5744f9",
+    "commit": "e9773adaa6962d3c06a06ac314e3c1db37d9bc09",
+    "patches": [
+      {
+        "file": "hardware/interfaces/0001-LOS24-compatibility.patch",
+        "sha256": "cdb12890f1fa531c4fddea523f21461c7b3046484d78b6810057edcc8259ebe4"
+      }
+    ]
+  },
+  {
+    "project": "hardware/mediatek",
+    "base": "e7585841a644f23a76de1aae8f42b21ec6ae5645",
+    "tree": "870ed2f91186cda4b30d65fc592bb89afcdffacb",
+    "commit": "e50baf04280d968fd0f4666208a2f8362f2eb96f",
+    "patches": [
+      {
+        "file": "hardware/mediatek/0001-LOS24-compatibility.patch",
+        "sha256": "e12c26af0f9c12763a467f0c57cbea26e5dc3641a3ead05ec94c15ae186641df"
+      }
+    ]
+  },
+  {
+    "project": "frameworks/base",
+    "base": "03e13d72d00d80eeba4465893dfad669e3ad3ce6",
+    "tree": "2227f6ae6412c08fe328da0e3ed80c1d86980972",
+    "commit": "1863e9803b6d91560a0d4f7e6fc20d3e4cbf5cd4",
+    "patches": [
+      {
+        "file": "frameworks/base/0001-Support-process-reclaim-and-gate-freezing-on-legacy-ke.patch",
+        "sha256": "8e7722277c96a49dcceea2492a63584f398e35d9283092a0542693fda9d57b2a"
+      }
+    ]
+  },
+  {
+    "project": "frameworks/av",
+    "base": "937eb9047ec2f88620f1f6a4d9e407f6c869d91a",
+    "tree": "b24810511ce11e5c73e5fe1717d4c81d371c60a3",
+    "commit": "3d51ebf1f11366c6fe3480b54f53146285a64c0f",
+    "patches": [
+      {
+        "file": "frameworks/av/0001-Revert-codec2-Extend-the-queue-empty-work-hack-to-MT.patch",
+        "sha256": "1ccc54b7d3ea52de6127e7b70b46299f2bfea942d82187e7847249c460c70411"
+      }
+    ]
+  },
+  {
+    "project": "system/core",
+    "base": "65d661b1a536701e8b118be4e9728d7b5ca727c9",
+    "tree": "27c4edeb85f7328a6ee2b70ddfdd1374cc896bfc",
+    "commit": "6628e88b60d6f130dd54aaca791625fa7d621e1a",
+    "patches": [
+      {
+        "file": "system/core/0001-libutils-rate-limit-RefBase-explicit-destruction-bac.patch",
+        "sha256": "2d8a81d41bf9ccd420d7771f28c93cf864d9ab2446fda242a05192acd46dca1d"
+      }
+    ]
+  },
+  {
+    "project": "system/zygote",
+    "base": "c24023080df0bdb5988c1e0c641d494574a97c40",
+    "tree": "de1c69fc6439ec96b1ef14f387bc5b66f816995f",
+    "commit": "f72a6c7335f9c70aabda37cdedf8c5e5f845b72e",
+    "patches": [
+      {
+        "file": "system/zygote/0001-zygote-Skip-capability-bounds-unsupported-by-the-ker.patch",
+        "sha256": "fadfe32694fa3fa2f2c7dbde6ac6eac8e3f8ded54bd14c60058de1c2a1b3586d"
+      }
+    ]
+  },
+  {
+    "project": ".repo/repo",
+    "base": "338ddb7d83ea35d5aef94d3c5d95c74fa3845780",
+    "tree": "776c0e921677ab2a12c00ef1936b220d17a4f36b",
+    "commit": "bebb5803ec9b189ebe736cf2db4ef94bb5df1efa",
+    "patches": [
+      {
+        "file": ".repo/repo/0001-LOS24-compatibility.patch",
+        "sha256": "c0c69c65e31618bf09a47ebf44532e57a9f2ea4f131a2b56f47921879feca305"
+      }
+    ]
+  }
+]
