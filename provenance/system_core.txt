@@ -1,0 +1,20 @@
+commit 04b1931d808d885a976f6408a83750841024c88c
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Fri Jul 24 11:01:07 2026 +0800
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:12:55 2026 +0000
+
+    libutils: rate-limit RefBase explicit-destruction backtrace
+
+    RefBase::~RefBase() logs a full symbolized CallStack every time an object
+    is explicitly destroyed while its weak count is non-zero. Capturing that
+    stack unwinds and decompresses each frame's .gnu_debugdata (LZMA), which is
+    expensive. Vendor blobs that trip this on a hot path make it pathological:
+    MediaTek's libgpu_aux GuiExtAuxBufferQueue teardown, reached from
+    eglDestroyImageKHR once per rendered frame, pegs the GPU thread on stack
+    unwinding and causes severe UI stutter during media playback.
+
+    Emit the diagnostic backtrace at most once per process; the one-line ALOGW
+    still fires every time so the misuse stays visible.
+
+    Change-Id: I71152bb50356c53b1f6c42316e30e4a19495732a

@@ -1,0 +1,67 @@
+diff --git a/AndroidProducts.mk b/AndroidProducts.mk
+index a775294..ddc0ca9 100755
+--- a/AndroidProducts.mk
++++ b/AndroidProducts.mk
+@@ -1,8 +1,4 @@
+-#
+-# SPDX-FileCopyrightText: The LineageOS Project
+ # SPDX-License-Identifier: Apache-2.0
+-#
+-
+ PRODUCT_MAKEFILES := \
+-    $(LOCAL_DIR)/lineage_chopin.mk \
+-    $(LOCAL_DIR)/lineage_chopin_rn10pro.mk
++    $(LOCAL_DIR)/custom_chopin.mk \
++    $(LOCAL_DIR)/custom_chopin_rn10pro.mk
+diff --git a/custom_chopin.mk b/custom_chopin.mk
+new file mode 100644
+index 0000000..7a873f9
+--- /dev/null
++++ b/custom_chopin.mk
+@@ -0,0 +1,32 @@
++# SPDX-License-Identifier: Apache-2.0
++# PixelOS entry; retain the validated chopin hardware configuration.
++TARGET_SCREEN_WIDTH := 1080
++TARGET_SCREEN_HEIGHT := 2400
++$(call inherit-product, device/xiaomi/chopin/device.mk)
++$(call inherit-product, vendor/custom/config/common_full_phone.mk)
++
++# GMS is inherited by PixelOS; do not also inherit vendor/gapps.
++PRODUCT_NAME := custom_chopin
++PRODUCT_DEVICE := chopin
++PRODUCT_MANUFACTURER := Xiaomi
++PRODUCT_BRAND := POCO
++PRODUCT_MODEL := POCO X3 GT
++PRODUCT_CHARACTERISTICS := nosdcard
++
++PRODUCT_BUILD_PROP_OVERRIDES += \
++    DeviceProduct=chopin \
++    SystemName=chopin
++ifneq ($(TARGET_PRODUCT),custom_chopin_rn10pro)
++PRODUCT_BUILD_PROP_OVERRIDES += \
++    BuildFingerprint=POCO/chopin_global/chopin:12/SP1A.210812.016/V14.0.6.0.TKPMIXM:user/release-keys
++endif
++
++PRODUCT_DEFAULT_DEV_CERTIFICATE := vendor/lineage-priv/keys/releasekey
++PRODUCT_EXTRA_RECOVERY_KEYS := vendor/lineage-priv/keys/releasekey
++PRODUCT_MAINLINE_BLUETOOTH_SEPOLICY_DEV_CERTIFICATES := vendor/lineage-priv/keys
++
++# Keep bring-up userdebug diagnosable without disabling USB authentication.
++ifeq ($(TARGET_BUILD_VARIANT),userdebug)
++# add_json_bool treats any nonempty string (including false) as true.
++PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG :=
++endif
+diff --git a/custom_chopin_rn10pro.mk b/custom_chopin_rn10pro.mk
+new file mode 100644
+index 0000000..1f14d35
+--- /dev/null
++++ b/custom_chopin_rn10pro.mk
+@@ -0,0 +1,8 @@
++# SPDX-License-Identifier: Apache-2.0
++$(call inherit-product, device/xiaomi/chopin/custom_chopin.mk)
++PRODUCT_NAME := custom_chopin_rn10pro
++PRODUCT_MODEL := Redmi Note 10 Pro
++PRODUCT_BRAND := Redmi
++PRODUCT_BUILD_PROP_OVERRIDES += \
++    CustomDevice=chopin_rn10pro \
++    BuildFingerprint=Redmi/chopin/chopin:12/SP1A.210812.016/V14.0.8.0.TKPCNXM:user/release-keys

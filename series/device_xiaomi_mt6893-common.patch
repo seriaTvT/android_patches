@@ -1,0 +1,18 @@
+diff --git a/dolby/Android.bp b/dolby/Android.bp
+index 430b272..885e4a9 100644
+--- a/dolby/Android.bp
++++ b/dolby/Android.bp
+@@ -26,11 +26,11 @@ android_app {
+         "org.lineageos.settings.resources",
+     ],
+ 
+-    required: ["preinstalled-packages-platform-dolby.xml"],
++    required: ["preinstalled-packages-mt6893-dolby.xml"],
+ }
+ 
+ prebuilt_etc {
+-    name: "preinstalled-packages-platform-dolby.xml",
++    name: "preinstalled-packages-mt6893-dolby.xml",
+     src: "preinstalled-packages-platform-dolby.xml",
+     sub_dir: "sysconfig",
+     system_ext_specific: true,

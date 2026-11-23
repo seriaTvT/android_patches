@@ -1,0 +1,7 @@
+commit 3015e38cb9048101e228cfe96aaea75102fd9577
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Tue Nov 3 12:21:31 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:12:57 2026 +0000
+
+    mediatek: Import split Pixel USB and stats namespaces

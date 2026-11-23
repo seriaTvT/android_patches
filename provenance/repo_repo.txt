@@ -1,0 +1,7 @@
+commit 39b43e59a7dfc95b23935b7b9e7588c52694217b
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Tue Nov 3 16:40:00 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 02:04:32 2026 +0000
+
+    git_config: tolerate read-only cache cleanup

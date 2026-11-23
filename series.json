@@ -1,0 +1,99 @@
+[
+  {
+    "project": "device/xiaomi/chopin",
+    "head": "690bdb426d1423f32f305914901fcb357445d2db",
+    "tree": "256a64c820de754edb694b958d8e652dc2513880",
+    "base": "81e876a97647623661f6d0ed5aab6256cb54789b",
+    "patch": "device_xiaomi_chopin.patch",
+    "sha256": "ccd91c287ca464d735e347dde9e141dcf7b981dba6ae6b5898a50c48df78e200"
+  },
+  {
+    "project": "frameworks/base",
+    "base": "f376ff5c61fa9d137d8afa304e89c2d715497bf5",
+    "source_commit": "1863e9803b6d",
+    "head": "243b181ca4b7b71994e56ee426645df6bd0bc454",
+    "tree": "8fba671c1cfb0ce098abb1f19c33533283c20d90",
+    "patch": "frameworks_base.patch",
+    "sha256": "1f4fba87545d70b73d065ca590dbb9aee91f73635b583ad51a751f888f80ce82",
+    "format": "git-diff"
+  },
+  {
+    "project": "system/core",
+    "base": "a2eb9b585295d0186a1df81f83feed6ab4b43b67",
+    "source_commit": "6628e88b60d6",
+    "head": "04b1931d808d885a976f6408a83750841024c88c",
+    "tree": "2a62ecbda34edc4ad7b89f3e92e26ee40fa1425a",
+    "patch": "system_core.patch",
+    "sha256": "069a59735664cc6c31a59351459b9e00eaccc16a88deffedd90633f5ed2bd30a"
+  },
+  {
+    "project": "system/zygote",
+    "base": "c24023080df0bdb5988c1e0c641d494574a97c40",
+    "source_commit": "f72a6c7335f9",
+    "head": "0e08328700e82ed3756e604f6ff5490ef802f6d2",
+    "tree": "de1c69fc6439ec96b1ef14f387bc5b66f816995f",
+    "patch": "system_zygote.patch",
+    "sha256": "fadfe32694fa3fa2f2c7dbde6ac6eac8e3f8ded54bd14c60058de1c2a1b3586d"
+  },
+  {
+    "project": "hardware/interfaces",
+    "base": "557052f4f3c8bbf3175e4dc74d428a13f298ccc1",
+    "source_commit": "e9773adaa696",
+    "head": "f59fd964343672ebb046562dba993ac858514546",
+    "tree": "27eb13bb5c128f46fe0a5ea3fd6a2138fe7f3ece",
+    "patch": "hardware_interfaces.patch",
+    "sha256": "cdb12890f1fa531c4fddea523f21461c7b3046484d78b6810057edcc8259ebe4"
+  },
+  {
+    "project": "hardware/mediatek",
+    "base": "e7585841a644f23a76de1aae8f42b21ec6ae5645",
+    "source_commit": "e50baf04280d",
+    "head": "3015e38cb9048101e228cfe96aaea75102fd9577",
+    "tree": "870ed2f91186cda4b30d65fc592bb89afcdffacb",
+    "patch": "hardware_mediatek.patch",
+    "sha256": "e12c26af0f9c12763a467f0c57cbea26e5dc3641a3ead05ec94c15ae186641df"
+  },
+  {
+    "project": "build/soong",
+    "base": "aab938fb55b676d1f35408f5c3fd419384e05cdd",
+    "source_commit": "f4cf84defbe1",
+    "head": "38ea9c60f88c4ebd9883753cea99557f575efb06",
+    "tree": "1d3f802f31a16450edc8aa9eacbe0b0f4e407f9f",
+    "patch": "build_soong.patch",
+    "sha256": "ffe5e687c5acf51fe2043137af64d54d44d736b054b60d1bc6046c73c6b9190c"
+  },
+  {
+    "project": "device/xiaomi/mt6893-common",
+    "base": "6b20488c2090c92b6198630798f1d8cb550b6ba2",
+    "head": "41034447a6f4155d563d857594f7ebc4e32ef02e",
+    "tree": "0f3e1991bde374b22f543b34bd37b83374f0fc6c",
+    "patch": "device_xiaomi_mt6893-common.patch",
+    "sha256": "a25a0b35cdcdea4d63a91d6c1d1dfc5dd98dfd4a5c1a6fc3d0812b0b9cc1db2b"
+  },
+  {
+    "project": ".repo/repo",
+    "base": "338ddb7d83ea35d5aef94d3c5d95c74fa3845780",
+    "head": "39b43e59a7dfc95b23935b7b9e7588c52694217b",
+    "tree": "776c0e921677ab2a12c00ef1936b220d17a4f36b",
+    "patch": "repo_readonly_cache.patch",
+    "sha256": "c0c69c65e31618bf09a47ebf44532e57a9f2ea4f131a2b56f47921879feca305"
+  },
+  {
+    "project": "device/xiaomi/ares",
+    "base": "ceac8a5ff8006af6dd6f1cc2a03acbe1e9f10e23",
+    "patch": "device_xiaomi_ares.patch",
+    "sha256": "ecd913db0bb0970f4790d83d1c6933aea7e7d32af3a6877b38f10b16288aa1d9",
+    "head": "bf0128220cf81e78a5f35ef450a3c588b15a92e7",
+    "tree": "0304d8c240fc3283b13ab615d53eb85563f954eb",
+    "format": "git-diff"
+  },
+  {
+    "project": "packages/apps/AresParts",
+    "base": "405cc2687580b140d71de5389a9ac7d259a2c1d8",
+    "patch": "packages_apps_AresParts.patch",
+    "sha256": "44979c03cb4184c28f2b46f985625ea119803c85b73f1500e515a4d3e14e60d4",
+    "head": "30b43cb10eb8200a0897f85d572d5198a179bf7a",
+    "tree": "3789f55512f3fbf83f609d87ce392ff5dc77db21",
+    "format": "git-diff"
+  }
+]

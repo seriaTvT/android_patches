@@ -1,0 +1,11 @@
+commit f59fd964343672ebb046562dba993ac858514546
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Tue Nov 3 17:14:51 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:12:57 2026 +0000
+
+    Restore frozen HIDL definitions required by FCM 6
+
+    Retain the complete MT6893 Android 12 vendor contract by restoring the four removed packages and their dumpstate/input dependencies from 941911355a5dfcff8ff7fa7d40b8062f4c4593f5. Restore only definitions, build declarations, and missing frozen hashes; leave service implementations and product package selections unchanged.
+
+    Change-Id: Ia2d2aca44337deceb61d8a6a12384b04c7fa2a22

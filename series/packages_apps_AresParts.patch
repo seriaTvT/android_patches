@@ -1,0 +1,78 @@
+diff --git a/Android.bp b/Android.bp
+index 48595d7..c59f749 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -18,7 +18,6 @@ android_app {
+         "androidx.core_core-ktx",
+         "androidx.preference_preference",
+         "SettingsLib",
+-        "org.lineageos.platform.internal",
+         "org.lineageos.settings.resources",
+     ],
+ 
+diff --git a/src/org/lineageos/settings/ares/led/LedController.kt b/src/org/lineageos/settings/ares/led/LedController.kt
+index 6d9f37b..b4762d9 100644
+--- a/src/org/lineageos/settings/ares/led/LedController.kt
++++ b/src/org/lineageos/settings/ares/led/LedController.kt
+@@ -17,7 +17,7 @@ import android.os.Handler
+ import android.os.HandlerThread
+ import android.telephony.TelephonyManager
+ import android.util.Log
+-import lineageos.providers.LineageSettings
++import android.provider.Settings
+ import org.lineageos.settings.ares.hw.RgbLed
+ import org.lineageos.settings.ares.util.ForegroundApp
+ import java.util.Random
+@@ -28,7 +28,7 @@ import kotlin.math.sin
+  * LED effect engine. Decides who owns the light strips and animates them.
+  *
+  * These strips double as the system battery/charging light: the framework
+- * (LineageBatteryLights in BatteryService) drives them whenever a charger is
++ * (BatteryService) drives them whenever a charger is
+  * connected. That makes the framework a second, independent writer, so the
+  * controller never fights it blindly:
+  *
+@@ -37,7 +37,7 @@ import kotlin.math.sin
+  *    strips, screen on or off. This is stock behavior — no race, no cleanup.
+  *  - Charging indicator OFF: effects win even while charging. Because the
+  *    framework would otherwise overwrite them on every battery event, the app
+- *    suppresses the system battery light (LineageSettings BATTERY_LIGHT_ENABLED)
++ *    suppresses the system battery light (Settings.Global battery_light_enabled)
+  *    for as long as it is actively driving an effect, and restores it on
+  *    release — the restore write nudges BatteryService to repaint immediately,
+  *    so the charging light returns with no dark gap.
+@@ -232,7 +232,7 @@ class LedController(private val context: Context) {
+ 
+     /**
+      * Turn the system battery light off (or back on) by driving its
+-     * LineageSettings switch, saving the user's value so it can be restored.
++     * Settings.Global switch, saving the user's value so it can be restored.
+      * Idempotent; the saved value and a recovery flag persist across a crash.
+      */
+     private fun setBatteryLightSuppressed(suppress: Boolean) {
+@@ -266,13 +266,13 @@ class LedController(private val context: Context) {
+     }
+ 
+     private fun readBatteryLight(): Int? = runCatching {
+-        LineageSettings.System.getInt(context.contentResolver, BATTERY_LIGHT_ENABLED, 1)
++        Settings.Global.getInt(context.contentResolver, BATTERY_LIGHT_ENABLED, 1)
+     }.getOrNull()
+ 
+     /** Returns false (and logs) if the write is denied, so state stays honest. */
+     private fun writeBatteryLight(value: Int): Boolean = runCatching {
+-        LineageSettings.System.putInt(context.contentResolver, BATTERY_LIGHT_ENABLED, value)
+-    }.onFailure { Log.e(TAG, "battery light write <- $value failed: ${it.message}") }.isSuccess
++        Settings.Global.putInt(context.contentResolver, BATTERY_LIGHT_ENABLED, value)
++    }.onFailure { Log.e(TAG, "battery light write <- $value failed: ${it.message}") }.getOrDefault(false)
+ 
+     private fun batterySticky(): Intent? =
+         context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+@@ -287,7 +287,7 @@ class LedController(private val context: Context) {
+     companion object {
+         private const val TAG = "AresParts.Led"
+ 
+-        // lineageos.providers.LineageSettings.System.BATTERY_LIGHT_ENABLED
++        // PixelOS BatteryService observes this global setting.
+         private const val BATTERY_LIGHT_ENABLED = "battery_light_enabled"
+ 
+         private const val DISCO_TICK_MS = 1000L

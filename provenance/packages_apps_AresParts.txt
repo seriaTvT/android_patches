@@ -1,0 +1,15 @@
+commit 729ac683e2617db2f2b81e80b9ffb98d899d1e3e
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 17:33:35 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 17:33:35 2026 +0000
+
+    AresParts: Use PixelOS battery light settings without Lineage SDK
+
+commit 30b43cb10eb8200a0897f85d572d5198a179bf7a
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 17:39:20 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 17:39:20 2026 +0000
+
+    AresParts: Document the PixelOS battery light backend

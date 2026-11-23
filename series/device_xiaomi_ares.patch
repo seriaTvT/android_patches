@@ -1,0 +1,55 @@
+diff --git a/AndroidProducts.mk b/AndroidProducts.mk
+index 6679f03..bb45d4a 100644
+--- a/AndroidProducts.mk
++++ b/AndroidProducts.mk
+@@ -1,7 +1,2 @@
+-#
+-# SPDX-FileCopyrightText: The LineageOS Project
+ # SPDX-License-Identifier: Apache-2.0
+-#
+-
+-PRODUCT_MAKEFILES := \
+-    $(LOCAL_DIR)/lineage_ares.mk
++PRODUCT_MAKEFILES := $(LOCAL_DIR)/custom_ares.mk
+diff --git a/custom_ares.mk b/custom_ares.mk
+new file mode 100644
+index 0000000..3bac2b6
+--- /dev/null
++++ b/custom_ares.mk
+@@ -0,0 +1,23 @@
++# SPDX-License-Identifier: Apache-2.0
++TARGET_SCREEN_WIDTH := 1080
++TARGET_SCREEN_HEIGHT := 2400
++$(call inherit-product, device/xiaomi/ares/device.mk)
++$(call inherit-product, vendor/custom/config/common_full_phone.mk)
++
++PRODUCT_NAME := custom_ares
++PRODUCT_DEVICE := ares
++PRODUCT_MANUFACTURER := Xiaomi
++PRODUCT_BRAND := Redmi
++PRODUCT_MODEL := Redmi K40 Gaming
++PRODUCT_CHARACTERISTICS := nosdcard
++PRODUCT_BUILD_PROP_OVERRIDES += \
++    CustomDevice=ares \
++    BuildFingerprint=Redmi/ares/ares:12/SP1A.210812.016/V14.0.5.0.TKJINXM:user/release-keys \
++    DeviceProduct=ares \
++    SystemName=ares
++PRODUCT_DEFAULT_DEV_CERTIFICATE := vendor/lineage-priv/keys/releasekey
++PRODUCT_EXTRA_RECOVERY_KEYS := vendor/lineage-priv/keys/releasekey
++PRODUCT_MAINLINE_BLUETOOTH_SEPOLICY_DEV_CERTIFICATES := vendor/lineage-priv/keys
++ifeq ($(TARGET_BUILD_VARIANT),userdebug)
++PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG :=
++endif
+diff --git a/device.mk b/device.mk
+index 591ccb5..3cac3d8 100644
+--- a/device.mk
++++ b/device.mk
+@@ -20,8 +20,6 @@ PRODUCT_PACKAGES += \
+     FrameworksResOverlayAres \
+     SystemUIOverlayAres \
+ 
+-PRODUCT_PACKAGES += \
+-    LineageSDKOverlayAres \
+ 
+ PRODUCT_ENFORCE_RRO_TARGETS := *
+ 

@@ -1,0 +1,20 @@
+commit 0e08328700e82ed3756e604f6ff5490ef802f6d2
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Wed Nov 4 10:45:49 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:12:55 2026 +0000
+
+    zygote: Skip capability bounds unsupported by the kernel
+
+    Android userspace defines capability 40, but the chopin 4.14 kernel
+    implements capabilities only through 39. PR_CAPBSET_READ returns EINVAL
+    for the unknown bit, causing every native app zygote to panic before
+    initializing its socket. Chrome then times out waiting for its GPU
+    process and blocks other app starts on the system_server start thread.
+
+    Ignore only GetCapBoundFailure(EINVAL), as there is no kernel capability
+    to drop. Keep actual capability drops and all other failures unchanged.
+
+    Verified by strace of the failing child, existing host unit tests; see LOS24-PORT-LOG for the device evidence.
+
+    Change-Id: I16a7a2c5eb9ea1ca83c2c99bd15deeef8f717662

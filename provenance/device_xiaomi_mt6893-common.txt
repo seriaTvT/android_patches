@@ -1,0 +1,7 @@
+commit 41034447a6f4155d563d857594f7ebc4e32ef02e
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Fri Nov 20 13:21:52 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:21:52 2026 +0000
+
+    mt6893-common: Namespace device Dolby sysconfig for PixelOS

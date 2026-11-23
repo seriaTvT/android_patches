@@ -1,0 +1,7 @@
+commit bf0128220cf81e78a5f35ef450a3c588b15a92e7
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 17:33:35 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 17:33:35 2026 +0000
+
+    ares: Add PixelOS product using the validated MT6893 baseline

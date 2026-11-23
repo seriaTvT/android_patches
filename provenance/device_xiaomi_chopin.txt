@@ -1,0 +1,39 @@
+commit 8815812e2e7a3df1c2165d0d860c4a6b8ce0e75b
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Fri Nov 20 03:42:09 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 03:42:09 2026 +0000
+
+    chopin: Add PixelOS products using validated LOS24 hardware baseline
+
+commit 860227af4e4b662ea623f1eef69f85c88f0a4e49
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Fri Nov 20 13:14:33 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:14:33 2026 +0000
+
+    chopin: Keep PixelOS bring-up userdebug debuggable
+
+commit ed6c0097a4721d211d3e379e40b55789a404cf51
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Fri Nov 20 13:21:52 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:21:52 2026 +0000
+
+    chopin: Set PixelOS boot animation dimensions before product inheritance
+
+commit c93e46822afa748961bbae4557cfce506a41188d
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 01:48:23 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 01:48:23 2026 +0000
+
+    chopin: Align n10p PixelOS generated device identity
+
+commit 690bdb426d1423f32f305914901fcb357445d2db
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 03:42:46 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 03:42:46 2026 +0000
+
+    chopin: Clear the non-debuggable flag for PixelOS userdebug

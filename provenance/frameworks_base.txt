@@ -1,0 +1,29 @@
+commit b34d750fed67fb5c0f414a2c0df4a77c4c4fbb62
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Wed Nov 4 13:41:48 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Fri Nov 20 13:12:55 2026 +0000
+
+    Support process reclaim and gate freezing on legacy kernels
+
+    Change-Id: I6a18042714784a936751d88ed307bbe92c433e79
+
+commit ec61fa197f1bc4cbde1317057740ff5186894a9c
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 17:33:36 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 17:33:36 2026 +0000
+
+    BatteryService: Coordinate charging LED ownership with device effects
+
+    Change-Id: I0121bb3aa63a1523fa4e58a6b1a93d4ef3230018
+
+commit 243b181ca4b7b71994e56ee426645df6bd0bc454
+Author:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+AuthorDate: Sat Nov 21 17:35:56 2026 +0000
+Commit:     seriaTvT <63958697+seriaTvT@users.noreply.github.com>
+CommitDate: Sat Nov 21 17:35:56 2026 +0000
+
+    BatteryService: Read the LED setting after providers are ready
+
+    Change-Id: I8a10b59b1d5e90fca7cfab4693d331611408b172
